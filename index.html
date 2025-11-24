@@ -1,131 +1,61 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LED Scale Mapper</title>
-<link rel="manifest" href="manifest.json" />
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: sans-serif;
-        background: #111;
-        color: #eee;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-    }
-    h1 {
-        font-size: 22px;
-        margin-bottom: 15px;
-        font-weight: 600;
-    }
-    .card {
-        width: 100%;
-        max-width: 420px;
-        background: #1b1b1b;
-        padding: 20px;
-        border-radius: 14px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        margin-bottom: 20px;
-    }
-    label { display: block; margin-top: 12px; }
-    input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border-radius: 8px;
-        border: none;
-        background: #2a2a2a;
-        color: #fff;
-    }
-    button {
-        width: 100%;
-        padding: 12px;
-        margin-top: 18px;
-        border: none;
-        border-radius: 10px;
-        background: #2979ff;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-    }
-    canvas {
-        width: 100%;
-        background: #000;
-        border-radius: 14px;
-        margin-top: 10px;
-    }
-</style>
-<link rel="manifest" href="manifest.json" />
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
-}
-</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LED Scale Mapper</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<h1>LED Scale Mapper</h1>
+  <div class="container">
+    <h1>LED Scale Mapper</h1>
 
-<div class="card">
-    <label>Lebar LED (cm)</label>
-    <input id="ledWidth" type="number" value="300" />
+    <div class="card inputs">
+      <h2>Pengaturan LED</h2>
+      <label>Lebar LED (meter): <input id="ledWidth" type="number" step="0.01" value="3"></label>
+      <label>Tinggi LED (meter): <input id="ledHeight" type="number" step="0.01" value="2"></label>
 
-    <label>Lebar Preview Laptop (cm)</label>
-    <input id="laptopWidth" type="number" value="9.82" />
+      <h2>Pengaturan Layar Laptop</h2>
+      <label>Lebar Layar (cm): <input id="screenWidth" type="number" step="0.01" value="9.82"></label>
+      <label>Tinggi Layar (cm): <input id="screenHeight" type="number" step="0.01" value="6"></label>
 
-    <label>Ukuran Objek di LED (cm)</label>
-    <input id="objectSize" type="number" value="130" />
+      <h2>Ukuran Objek di LED</h2>
+      <label>Lebar Objek (cm): <input id="objectWidth" type="number" step="0.01" value="130"></label>
+      <label>Tinggi Objek (cm): <input id="objectHeight" type="number" step="0.01" value="50"></label>
 
-    <button onclick="hitung()">Hitung</button>
+      <div class="row">
+        <button id="calculate">Hitung & Render</button>
+        <select id="mode">
+          <option value="simple">Simple</option>
+          <option value="realistic">Realistic</option>
+        </select>
+      </div>
+      <pre id="result" class="result"></pre>
+    </div>
 
-    <p id="resultText"></p>
-</div>
+    <div class="card previews">
+      <h2>Preview LED Screen</h2>
+      <div class="preview-wrapper" id="ledPreviewWrapper">
+        <div id="ledPreview" class="preview-surface"></div>
+      </div>
 
-<div class="card">
-    <canvas id="preview" width="380" height="120"></canvas>
-</div>
+      <h2>Preview Laptop Screen</h2>
+      <div class="preview-wrapper" id="laptopPreviewWrapper">
+        <div id="laptopPreview" class="preview-surface"></div>
+      </div>
+    </div>
 
+    <footer>
+      <small>Built for mapping — drag object in realistic mode. Export preset via Save Preset (coming soon).</small>
+    </footer>
+  </div>
+
+<script src="script.js"></script>
 <script>
-function hitung() {
-    const led = parseFloat(document.getElementById("ledWidth").value);
-    const laptop = parseFloat(document.getElementById("laptopWidth").value);
-    const obj = parseFloat(document.getElementById("objectSize").value);
-
-    if (!led || !laptop || !obj) return;
-
-    const scale = led / laptop;
-    const objPreview = obj / scale;
-
-    document.getElementById("resultText").innerText =
-        `Skala: 1 : ${scale.toFixed(2)} | Objek di layar: ${objPreview.toFixed(2)} cm`;
-
-    drawPreview(objPreview);
-}
-
-function drawPreview(previewCm) {
-    const canvas = document.getElementById("preview");
-    const ctx = canvas.getContext("2d");
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#333";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const px = previewCm * 8;
-    const x = (canvas.width - px) / 2;
-    const y = 40;
-
-    ctx.fillStyle = "#2979ff";
-    ctx.fillRect(x, y, px, 40);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "14px sans-serif";
-    ctx.fillText(`${previewCm.toFixed(2)} cm`, x + px/2 - 30, y + 60);
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(()=>{});
 }
 </script>
 </body>
 </html>
-
